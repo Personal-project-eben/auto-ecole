@@ -1,0 +1,35 @@
+{
+  "name": "Entraine-toi - Code de la Route",
+  "short_name": "Entraine-toi",
+  "description": "Quiz et flash cards pour réussir l'examen du code de la route",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0f0f23",
+  "theme_color": "#0f0f23",
+  "orientation": "portrait-primary",
+  "lang": "fr",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "utilities"],
+  "shortcuts": [
+    {
+      "name": "Quiz Examen",
+      "short_name": "Examen",
+      "description": "Lancer un quiz mode examen",
+      "url": "./index.html#exam",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

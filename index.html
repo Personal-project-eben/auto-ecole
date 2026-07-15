@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Entraine-toi - Code de la Route</title>
+  <meta name="description" content="Entraînez-vous au code de la route avec des quiz interactifs, flash cards et statistiques de progression." />
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0f0f23" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Entraine-toi" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-icon">🚗</div>
+        <div class="logo-text">
+          <span class="logo-title">Entraine-toi</span>
+          <span class="logo-sub">Code de la Route</span>
+        </div>
+      </div>
+      <nav class="header-nav">
+        <button class="nav-btn active" id="nav-quiz" onclick="showSection('quiz')">Quiz</button>
+        <button class="nav-btn" id="nav-flash" onclick="showSection('flash')">Flash Cards</button>
+        <button class="nav-btn" id="nav-panneaux" onclick="showSection('panneaux')">Panneaux</button>
+        <button class="nav-btn" id="nav-stats" onclick="showSection('stats')">Mes Stats</button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- HOME / QUIZ SECTION -->
+  <main class="main-container" id="section-quiz">
+
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-content">
+        <div class="hero-badge">🎯 Examen de Code</div>
+        <h1 class="hero-title">Prêt(e) pour votre <span class="highlight">examen ?</span></h1>
+        <p class="hero-desc">Entraînez-vous avec des questions basées sur votre support de cours officiel.</p>
+        <div class="hero-stats-bar">
+          <div class="stat-pill">
+            <span class="stat-num" id="total-questions-count">55</span>
+            <span class="stat-label">Questions</span>
+          </div>
+          <div class="stat-pill">
+            <span class="stat-num" id="home-sessions">0</span>
+            <span class="stat-label">Sessions</span>
+          </div>
+          <div class="stat-pill">
+            <span class="stat-num" id="home-best">-</span>
+            <span class="stat-label">Meilleur score</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Mode Selection -->
+    <section class="modes-section">
+      <h2 class="section-title">Choisissez votre mode</h2>
+      <div class="modes-grid">
+        <div class="mode-card" onclick="startQuiz('thematic')" id="mode-thematic">
+          <div class="mode-icon">📚</div>
+          <h3 class="mode-name">Par Thème</h3>
+          <p class="mode-desc">Choisissez un chapitre spécifique à réviser</p>
+          <div class="mode-arrow">→</div>
+        </div>
+        <div class="mode-card featured" onclick="startQuiz('exam')" id="mode-exam">
+          <div class="mode-badge">Recommandé</div>
+          <div class="mode-icon">🏆</div>
+          <h3 class="mode-name">Mode Examen</h3>
+          <p class="mode-desc">20 questions aléatoires, conditions d'examen réelles</p>
+          <div class="mode-arrow">→</div>
+        </div>
+        <div class="mode-card" onclick="startQuiz('random')" id="mode-random">
+          <div class="mode-icon">🎲</div>
+          <h3 class="mode-name">Aléatoire</h3>
+          <p class="mode-desc">Toutes les questions mélangées sans limite</p>
+          <div class="mode-arrow">→</div>
+        </div>
+        <div class="mode-card" onclick="startQuiz('panneaux')" id="mode-panneaux">
+          <div class="mode-icon">🛑</div>
+          <h3 class="mode-name">100% Panneaux</h3>
+          <p class="mode-desc">Entraînez-vous uniquement sur la signalisation</p>
+          <div class="mode-arrow">→</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Theme selection (hidden initially) -->
+    <section class="theme-selector" id="theme-selector" style="display:none">
+      <h2 class="section-title">Choisissez un chapitre</h2>
+      <div class="themes-grid" id="themes-grid"></div>
+      <button class="btn-back" onclick="hideThemeSelector()">← Retour</button>
+    </section>
+
+  </main>
+
+  <!-- QUIZ SCREEN -->
+  <div class="quiz-screen" id="quiz-screen" style="display:none">
+    <!-- Progress Bar -->
+    <div class="quiz-progress-bar">
+      <div class="quiz-progress-fill" id="quiz-progress-fill"></div>
+    </div>
+
+    <div class="quiz-container">
+      <!-- Top Bar -->
+      <div class="quiz-topbar">
+        <button class="quit-btn" onclick="quitQuiz()">✕ Quitter</button>
+        <div class="quiz-info">
+          <span class="quiz-counter" id="quiz-counter">Question 1 / 40</span>
+          <div class="quiz-timer" id="quiz-timer" style="margin: 0 1rem; font-weight: bold; color: var(--danger);">⏱ 20s</div>
+          <div class="quiz-score-badge" id="quiz-score-badge">✓ 0</div>
+        </div>
+      </div>
+
+      <!-- Question Card -->
+      <div class="question-card" id="question-card">
+        <div class="question-chapter" id="question-chapter">Chapitre 1</div>
+        <img id="question-image" src="" alt="Image de la question" style="display:none; max-width: 100%; max-height: 200px; border-radius: var(--radius); margin-bottom: 1rem; object-fit: cover; align-self: center;" />
+        <div class="question-text" id="question-text">La question apparaît ici</div>
+        <div class="options-list" id="options-list"></div>
+        <div style="text-align: right; margin-top: 1rem;">
+          <button id="validate-btn" class="btn-primary" onclick="validateAnswer()">Valider la réponse</button>
+        </div>
+
+        <!-- Feedback panel -->
+        <div class="feedback-panel" id="feedback-panel" style="display:none">
+          <div class="feedback-icon" id="feedback-icon"></div>
+          <div class="feedback-text" id="feedback-text"></div>
+          <div class="feedback-explication" id="feedback-explication"></div>
+          <button class="next-btn" id="next-btn" onclick="nextQuestion()">Question suivante →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS SCREEN -->
+  <div class="results-screen" id="results-screen" style="display:none">
+    <div class="results-container">
+      <div class="results-emoji" id="results-emoji">🏆</div>
+      <h2 class="results-title" id="results-title">Excellent !</h2>
+      <div class="results-score-circle">
+        <div class="score-circle" id="score-circle">
+          <span class="score-number" id="score-number">0</span>
+          <span class="score-total" id="score-total">/ 0</span>
+        </div>
+      </div>
+      <div class="results-pct" id="results-pct">0%</div>
+      <div class="results-breakdown" id="results-breakdown"></div>
+      <div class="results-actions">
+        <button class="btn-primary" onclick="restartQuiz()">🔄 Recommencer</button>
+        <button class="btn-secondary" onclick="showSection('quiz')">🏠 Accueil</button>
+        <button class="btn-secondary" onclick="reviewMistakes()">📝 Revoir les erreurs</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLASH CARDS SECTION -->
+  <div class="main-container" id="section-flash" style="display:none">
+    <section class="hero" style="margin-bottom: 1rem;">
+      <div class="hero-content">
+        <div class="hero-badge">🃏 Flash Cards</div>
+        <h1 class="hero-title">Mémorisez les <span class="highlight">règles clés</span></h1>
+        <p class="hero-desc">Cliquez sur la carte pour révéler la réponse</p>
+      </div>
+    </section>
+    <div class="flashcard-controls">
+      <button class="fc-nav-btn" onclick="prevCard()">← Précédent</button>
+      <span class="fc-counter" id="fc-counter">1 / 20</span>
+      <button class="fc-nav-btn" onclick="nextCard()">Suivant →</button>
+    </div>
+    <div class="flashcard-wrapper">
+      <div class="flashcard" id="flashcard" onclick="flipCard()">
+        <div class="fc-front" id="fc-front">
+          <div class="fc-category" id="fc-category">Catégorie</div>
+          <div class="fc-question" id="fc-question">Question</div>
+          <div class="fc-hint">👆 Cliquez pour voir la réponse</div>
+        </div>
+        <div class="fc-back" id="fc-back">
+          <div class="fc-answer" id="fc-answer">Réponse</div>
+        </div>
+      </div>
+    </div>
+    <div class="flashcard-theme-select">
+      <label>Filtrer par chapitre :</label>
+      <select id="fc-theme-select" onchange="filterFlashcards()">
+        <option value="all">Tous les chapitres</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- SECTION PANNEAUX (PDF EMBED) -->
+  <div class="main-container" id="section-panneaux" style="display:none">
+    <section class="hero" style="margin-bottom: 1rem;">
+      <div class="hero-content">
+        <div class="hero-badge">🛑 Dictionnaire</div>
+        <h1 class="hero-title">Tous les <span class="highlight">Panneaux</span></h1>
+        <p class="hero-desc">Consultez et apprenez la définition de chaque panneau avant de vous tester.</p>
+      </div>
+    </section>
+    
+    <div style="width: 100%; height: 80vh; background: var(--surface); border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border);">
+      <embed src="TOUS LES PANNEAUX.pdf" type="application/pdf" width="100%" height="100%" />
+    </div>
+  </div>
+
+  <!-- STATS SECTION -->
+  <div class="main-container" id="section-stats" style="display:none">
+    <section class="hero" style="margin-bottom: 1rem;">
+      <div class="hero-content">
+        <div class="hero-badge">📊 Statistiques</div>
+        <h1 class="hero-title">Votre <span class="highlight">progression</span></h1>
+      </div>
+    </section>
+    <div class="stats-grid">
+      <div class="stats-card">
+        <div class="stats-icon">🎯</div>
+        <div class="stats-label">Sessions jouées</div>
+        <div class="stats-value" id="stat-sessions">0</div>
+      </div>
+      <div class="stats-card">
+        <div class="stats-icon">✅</div>
+        <div class="stats-label">Bonnes réponses</div>
+        <div class="stats-value" id="stat-correct">0</div>
+      </div>
+      <div class="stats-card">
+        <div class="stats-icon">❌</div>
+        <div class="stats-label">Mauvaises réponses</div>
+        <div class="stats-value" id="stat-wrong">0</div>
+      </div>
+      <div class="stats-card">
+        <div class="stats-icon">🏆</div>
+        <div class="stats-label">Meilleur score</div>
+        <div class="stats-value" id="stat-best">-</div>
+      </div>
+      <div class="stats-card wide">
+        <div class="stats-icon">📈</div>
+        <div class="stats-label">Taux de réussite global</div>
+        <div class="stats-value" id="stat-rate">-</div>
+        <div class="mini-progress-bar">
+          <div class="mini-progress-fill" id="stat-rate-bar" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+    <div class="stats-history" id="stats-history">
+      <h2 class="section-title">Historique des sessions</h2>
+      <div id="history-list"></div>
+    </div>
+    <div style="text-align:center; margin-top:2rem;">
+      <button class="btn-danger" onclick="resetStats()">🗑️ Réinitialiser les statistiques</button>
+    </div>
+  </div>
+
+  <!-- REVIEW MISTAKES SCREEN -->
+  <div class="main-container" id="section-review" style="display:none">
+    <section class="hero" style="margin-bottom:1rem;">
+      <div class="hero-content">
+        <div class="hero-badge">📝 Correction</div>
+        <h1 class="hero-title">Revoir vos <span class="highlight">erreurs</span></h1>
+      </div>
+    </section>
+    <div id="review-list"></div>
+    <div style="text-align:center;margin-top:2rem;">
+      <button class="btn-secondary" onclick="showSection('quiz')">🏠 Accueil</button>
+    </div>
+  </div>
+
+  <script src="questions.js"></script>
+  <script src="app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js');
+    }
+  </script>
+</body>
+</html>
