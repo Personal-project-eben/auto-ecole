@@ -443,6 +443,16 @@ body {
   background: rgba(16,185,129,0.06);
 }
 
+/* Mode Examen audio : seule la lettre est visible, la réponse doit être écoutée */
+.option-btn.audio-only {
+  justify-content: center;
+}
+.option-btn.audio-only .option-letter {
+  min-width: 48px;
+  height: 48px;
+  font-size: 1.3rem;
+}
+
 @keyframes pulse-green {
   0% { transform: scale(1); }
   50% { transform: scale(1.02); }

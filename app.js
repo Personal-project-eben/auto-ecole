@@ -11,7 +11,34 @@ let appState = {
 };
 
 let timerInterval;
-let timeLeft = 20;
+let timeLeft = 40;
+
+// AUDIO (Mode Examen)
+function stopSpeech() {
+  if ('speechSynthesis' in window) {
+    speechSynthesis.cancel();
+  }
+}
+
+function speakText(text) {
+  if (!('speechSynthesis' in window)) return;
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'fr-FR';
+  utterance.rate = 0.95;
+  speechSynthesis.speak(utterance);
+}
+
+function speakQuestionAudio(q) {
+  stopSpeech();
+  const letters = ['A', 'B', 'C', 'D'];
+  speakText(q.text);
+  q.options.forEach((opt, i) => speakText(`Option ${letters[i]}. ${opt}`));
+}
+
+function replayAudio() {
+  const q = appState.currentQuestions[appState.currentIndex];
+  if (q) speakQuestionAudio(q);
+}
 
 // Statistiques (sauvegardées en localStorage si possible)
 let userStats = JSON.parse(localStorage.getItem('autoEcoleStats')) || {
@@ -89,7 +116,11 @@ function startQuiz(mode) {
 }
 
 function startThematicQuiz(theme) {
+  appState.mode = 'thematic';
   appState.selectedTheme = theme;
+  appState.score = 0;
+  appState.mistakes = [];
+  appState.currentIndex = 0;
   appState.currentQuestions = questions.filter(q => q.chapter === theme);
   hideThemeSelector();
   launchQuizScreen();
@@ -165,14 +196,21 @@ function loadQuestion() {
   const progressPct = (appState.currentIndex / appState.currentQuestions.length) * 100;
   document.getElementById('quiz-progress-fill').style.width = `${progressPct}%`;
 
+  const isAudioMode = appState.mode === 'exam';
+
   const optionsList = document.getElementById('options-list');
   optionsList.innerHTML = '';
-  
+
   const letters = ['A', 'B', 'C', 'D'];
   q.options.forEach((opt, index) => {
     const btn = document.createElement('button');
     btn.className = 'option-btn';
-    btn.innerHTML = `<span class="option-letter">${letters[index]}</span>${opt}`;
+    if (isAudioMode) {
+      btn.classList.add('audio-only');
+      btn.innerHTML = `<span class="option-letter">${letters[index]}</span>`;
+    } else {
+      btn.innerHTML = `<span class="option-letter">${letters[index]}</span>${opt}`;
+    }
     btn.onclick = () => toggleAnswer(index, btn);
     optionsList.appendChild(btn);
   });
@@ -180,7 +218,16 @@ function loadQuestion() {
   document.getElementById('feedback-panel').style.display = 'none';
   document.getElementById('validate-btn').style.display = 'inline-block';
   document.getElementById('validate-btn').disabled = false;
-  
+
+  const replayBtn = document.getElementById('replay-audio-btn');
+  if (isAudioMode) {
+    replayBtn.style.display = 'inline-block';
+    speakQuestionAudio(q);
+  } else {
+    replayBtn.style.display = 'none';
+    stopSpeech();
+  }
+
   startTimer();
 }
 
@@ -220,13 +267,22 @@ function toggleAnswer(index, btnElement) {
 
 function validateAnswer(isTimeout = false) {
   clearInterval(timerInterval);
+  stopSpeech();
   document.getElementById('validate-btn').style.display = 'none';
-  
+  document.getElementById('replay-audio-btn').style.display = 'none';
+
   const btns = document.querySelectorAll('.option-btn');
   btns.forEach(b => b.disabled = true);
 
   const q = appState.currentQuestions[appState.currentIndex];
-  
+  const letters = ['A', 'B', 'C', 'D'];
+
+  // Révéler le texte des options (utile en Mode Examen où seules les lettres étaient visibles)
+  btns.forEach((btn, idx) => {
+    btn.classList.remove('audio-only');
+    btn.innerHTML = `<span class="option-letter">${letters[idx]}</span>${q.options[idx]}`;
+  });
+
   // Array comparison
   const sortedSelected = [...appState.selectedAnswers].sort();
   const sortedCorrect = [...q.correctAnswers].sort();
@@ -280,6 +336,7 @@ function nextQuestion() {
 }
 
 function endQuiz() {
+  stopSpeech();
   document.getElementById('quiz-screen').style.display = 'none';
   document.getElementById('results-screen').style.display = 'flex';
 
@@ -324,6 +381,7 @@ function endQuiz() {
 function quitQuiz() {
   if(confirm("Voulez-vous vraiment quitter l'entraînement en cours ?")) {
     clearInterval(timerInterval);
+    stopSpeech();
     document.getElementById('quiz-screen').style.display = 'none';
     showSection('quiz');
   }
@@ -331,7 +389,11 @@ function quitQuiz() {
 
 function restartQuiz() {
   document.getElementById('results-screen').style.display = 'none';
-  startQuiz(appState.mode);
+  if (appState.mode === 'thematic') {
+    startThematicQuiz(appState.selectedTheme);
+  } else {
+    startQuiz(appState.mode);
+  }
 }
 
 function reviewMistakes() {
