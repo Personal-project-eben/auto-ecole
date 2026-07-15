@@ -233,7 +233,7 @@ function loadQuestion() {
 
 function startTimer() {
   clearInterval(timerInterval);
-  timeLeft = 20;
+  timeLeft = 40;
   const timerDisplay = document.getElementById('quiz-timer');
   timerDisplay.innerText = `⏱ ${timeLeft}s`;
   timerDisplay.style.color = 'var(--text)';
